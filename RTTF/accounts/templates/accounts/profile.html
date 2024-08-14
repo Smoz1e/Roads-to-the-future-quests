@@ -1,0 +1,21 @@
+<!-- accounts/templates/accounts/profile.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль пользователя</title>
+</head>
+<body>
+    <h1>Профиль пользователя</h1>
+    <p>Добро пожаловать, {{ user.username }}!</p>
+    <p>Это ваша страница профиля.</p>
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}">Главная</a></li>
+            <li><a href="{% url 'profile' %}">Профиль</a></li>
+            <li><a href="{% url 'logout' %}">Выйти</a></li>
+        </ul>
+    </nav>
+</body>
+</html>
