@@ -28,10 +28,15 @@ class QuestAnswerForm(forms.Form):
     def __init__(self, *args, **kwargs):
         quest = kwargs.pop('quest')
         super().__init__(*args, **kwargs)
+
         for question in quest.questions.all():
             self.fields[f'question_{question.id}'] = forms.CharField(
                 label=question.question_text,
                 widget=forms.TextInput(attrs={'placeholder': 'Введите ваш ответ'})
+            )
+            self.fields[f'submit_{question.id}'] = forms.BooleanField(
+                required=False,
+                widget=forms.HiddenInput()
             )
 
 

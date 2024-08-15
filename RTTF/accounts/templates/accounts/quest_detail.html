@@ -1,5 +1,4 @@
 <!-- accounts/templates/accounts/quest_detail.html -->
-
 <h1>{{ quest.title }}</h1>
 
 <form method="post">
@@ -12,27 +11,32 @@
             {% endif %}
             <label for="id_question_{{ question.id }}">Ваш ответ:</label>
             <input type="text" name="question_{{ question.id }}" id="id_question_{{ question.id }}" placeholder="Введите ваш ответ">
+            {% for q, res in result %}
+                {% if q == question %}
+                    <p class="response-message">{{ res }}</p>
+                {% endif %}
+            {% endfor %}
         </div>
     {% endfor %}
     <button type="submit">Проверить ответы</button>
 </form>
 
-{% if result %}
-    <h2>Результаты:</h2>
-    <ul>
-        {% for question, res in result %}
-            <li>
-                <strong>{{ question.question_text }}</strong> - {{ res }}
-            </li>
-        {% endfor %}
-    </ul>
-{% endif %}
+{% for q, res in result %}
+    {% if not q %}
+        <h2>{{ res }}</h2>
+    {% endif %}
+{% endfor %}
 
 {% if quest_progress.is_completed %}
     <p>Вы уже прошли этот квест.</p>
 {% else %}
     <p>Вы не прошли этот квест.</p>
 {% endif %}
+
+
+
+
+
 
 
 

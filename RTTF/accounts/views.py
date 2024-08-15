@@ -71,6 +71,7 @@ def logout_view(request):
 # Детали квеста
 logger = logging.getLogger(__name__)
 
+# views.py
 @login_required
 def quest_detail(request, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
@@ -82,7 +83,6 @@ def quest_detail(request, quest_id):
         form = QuestAnswerForm(request.POST, quest=quest)
         if form.is_valid():
             all_correct = True
-            result = []
             for question in quest.questions.all():
                 user_answer = form.cleaned_data.get(f'question_{question.id}', '').strip().lower()
                 correct_answer = question.correct_answer.strip().lower()
@@ -90,16 +90,19 @@ def quest_detail(request, quest_id):
                     all_correct = False
                     result.append((question, 'Неверно, попробуйте еще раз.'))
                 else:
-                    result.append((question, 'Верно!'))
+                    success_message = question.success_message or 'Верно!'
+                    result.append((question, success_message))
 
             if all_correct:
                 quest_progress.is_completed = True
                 quest_progress.save()
                 logger.debug(f"Quest completed by user {user.id} for quest {quest.id}")
-                result = [("Вы успешно прошли этот квест!", '')]
+                result.append((None, "Вы успешно прошли этот квест!"))
             else:
                 quest_progress.is_completed = False
                 quest_progress.save()
+        else:
+            form = QuestAnswerForm(quest=quest)
     else:
         form = QuestAnswerForm(quest=quest)
 
@@ -109,6 +112,12 @@ def quest_detail(request, quest_id):
         'result': result,
         'quest_progress': quest_progress,
     })
+
+
+
+
+
+
 
 
 
