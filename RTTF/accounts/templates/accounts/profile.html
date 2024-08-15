@@ -10,6 +10,9 @@
             margin: 0;
             padding: 0;
             background-color: #F0F0F0;
+            display: flex;
+            flex-direction: column;
+            min-height: 10vh;
         }
 
         .profile-container {
@@ -21,6 +24,10 @@
             padding: 40px;
             border: 1px solid #E0D5D0;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            position: relative;
         }
 
         .profile-header {
@@ -33,6 +40,7 @@
             font-size: 32px;
             margin-bottom: 10px;
             font-weight: 600;
+            animation: fadeIn 1.5s ease-in-out;
         }
 
         .profile-header p {
@@ -43,6 +51,7 @@
 
         .quest-section {
             margin-top: 20px;
+            flex: 1;
         }
 
         .quest-section h2 {
@@ -104,9 +113,41 @@
             background-color: #9E9E9E; /* Серый */
         }
 
+        .logout-button {
+            margin: 20px auto;
+            padding: 10px 15px;
+            background-color: #F44336; /* Красный */
+            color: #FFFFFF;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            display: block;
+            width: 200px;
+        }
+
+        .logout-button:hover {
+            background-color: #D32F2F; /* Темный красный */
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @media (max-width: 600px) {
             .profile-container {
                 padding: 20px;
+                margin: 20px;
             }
 
             .profile-header h1 {
@@ -124,6 +165,11 @@
             .status {
                 font-size: 12px;
                 padding: 4px 8px;
+            }
+
+            .logout-button {
+                font-size: 14px;
+                width: 160px;
             }
         }
     </style>
@@ -146,9 +192,14 @@
                 {% endfor %}
             </ul>
         </div>
+        
+        <a href="{% url 'logout' %}" class="logout-button">Выйти</a>
     </div>
 </body>
 </html>
+
+
+
 
 
 
