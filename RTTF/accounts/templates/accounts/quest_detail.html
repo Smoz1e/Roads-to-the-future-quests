@@ -1,0 +1,39 @@
+<!-- templates/accounts/quest_detail.html -->
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>{{ quest.title }}</h2>
+  <p>{{ quest.description }}</p>
+  
+  <h3>Main Question</h3>
+  <p>{{ quest.main_question }}</p>
+  
+  <form method="post">
+    {% csrf_token %}
+    
+    {{ form.non_field_errors }}
+    
+    <div>
+      <label for="main_question_answer">Answer:</label>
+      {{ form.main_question_answer }}
+    </div>
+    
+    {% for form in form.additional_question_formset %}
+      <div>
+        {{ form.non_field_errors }}
+        {{ form }}
+      </div>
+    {% endfor %}
+    
+    <button type="submit">Submit Answers</button>
+  </form>
+  
+  {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}
+

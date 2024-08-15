@@ -1,0 +1,23 @@
+<!-- accounts/templates/accounts/profile.html -->
+
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Добро пожаловать, {{ user.username }}!</h1>
+  <h2>Ваши доступные квесты:</h2>
+  <div>
+    {% if quests %}
+      {% for quest in quests %}
+        <form action="{% url 'quest_detail' quest.id %}" method="get">
+          <button type="submit">{{ quest.title }}</button>
+        </form>
+      {% endfor %}
+    {% else %}
+      <p>У вас нет доступных квестов.</p>
+    {% endif %}
+  </div>
+{% endblock %}
+
+
+
+
