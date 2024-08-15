@@ -25,6 +25,15 @@ class UserLoginForm(AuthenticationForm):
     password = forms.CharField(label='Password', widget=forms.PasswordInput())
 
 class QuestAnswerForm(forms.Form):
-    answer = forms.CharField(max_length=200, label='Ваш ответ', widget=forms.TextInput(attrs={'placeholder': 'Введите ответ'}))
+    def __init__(self, *args, **kwargs):
+        quest = kwargs.pop('quest', None)
+        super().__init__(*args, **kwargs)
+        if quest:
+            for question in quest.questions.all():
+                self.fields[f'question_{question.id}'] = forms.CharField(
+                    label=question.question_text,
+                    widget=forms.Textarea,
+                    required=True
+                )
 
 

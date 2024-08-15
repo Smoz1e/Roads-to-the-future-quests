@@ -7,21 +7,38 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from .forms import UserRegisterForm, UserLoginForm, QuestAnswerForm
 from .models import CustomUser, Quest
-
+from .forms import QuestAnswerForm
+from .models import Quest, QuestProgress, Question
+import logging
 # Домашняя страничка сайта
 def home(request):
     return render(request, 'home.html')  # Шаблон домашней страницы
 
 # Профиль пользователя
+# accounts/views.py
+
 @login_required
 def profile(request):
     user = request.user
-    quests = Quest.objects.all()  # Получаем все квесты из базы данных
-    context = {
+    quests = Quest.objects.all()
+    quest_status = []
+
+    for quest in quests:
+        quest_progress = QuestProgress.objects.filter(user=user, quest=quest).first()
+        if quest_progress:
+            if quest_progress.is_completed:
+                status = "Пройдено"
+            else:
+                status = "Не пройдено"
+        else:
+            status = "Нет данных"
+        quest_status.append((quest, status))
+
+    return render(request, 'accounts/profile.html', {
         'user': user,
-        'quests': quests  # Передаем все квесты в контекст
-    }
-    return render(request, 'accounts/profile.html', context)
+        'quest_status': quest_status,
+    })
+
 
 # Регистрация
 class RegisterView(CreateView):
@@ -52,26 +69,55 @@ def logout_view(request):
     return redirect('login')
 
 # Детали квеста
+logger = logging.getLogger(__name__)
+
 @login_required
 def quest_detail(request, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
-    result = None
-    
+    user = request.user
+    quest_progress, created = QuestProgress.objects.get_or_create(user=user, quest=quest)
+    result = []
+
+    logger.debug(f"QuestProgress for user {user.id} and quest {quest.id}: {quest_progress}")
+
     if request.method == 'POST':
-        form = QuestAnswerForm(request.POST)
+        form = QuestAnswerForm(request.POST, quest=quest)
         if form.is_valid():
-            user_answer = form.cleaned_data['answer']
-            if user_answer.strip().lower() == quest.correct_answer.strip().lower():
-                result = 'Верно!'
+            all_correct = True
+            result = []
+            for question in quest.questions.all():
+                user_answer = form.cleaned_data.get(f'question_{question.id}', '').strip().lower()
+                correct_answer = question.correct_answer.strip().lower()
+                if user_answer != correct_answer:
+                    all_correct = False
+                    result.append((question, 'Неверно, попробуйте еще раз.'))
+                else:
+                    result.append((question, 'Верно!'))
+
+            if all_correct:
+                quest_progress.is_completed = True
+                quest_progress.save()
+                logger.debug(f"Quest completed by user {user.id} for quest {quest.id}")
+                result = [("Вы успешно прошли этот квест!", '')]
             else:
-                result = 'Неверно, попробуйте еще раз.'
+                quest_progress.is_completed = False
+                quest_progress.save()
+
     else:
-        form = QuestAnswerForm()
+        form = QuestAnswerForm(quest=quest)
 
     return render(request, 'accounts/quest_detail.html', {
         'quest': quest,
         'form': form,
         'result': result,
+        'quest_progress': quest_progress,
     })
+
+
+
+
+
+
+
 
 

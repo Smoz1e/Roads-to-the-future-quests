@@ -2,14 +2,24 @@
 
 <h1>Профиль пользователя {{ user.username }}</h1>
 
-<h2>Все квесты</h2>
+<h2>Квесты</h2>
 <ul>
-    {% for quest in quests %}
+    {% for quest, status in quest_status %}
         <li>
             <a href="{% url 'quest_detail' quest.id %}">{{ quest.title }}</a>
+            {% if status == "Пройдено" %}
+                - <span style="color: green;">{{ status }}</span>
+            {% elif status == "Не пройдено" %}
+                - <span style="color: red;">{{ status }}</span>
+            {% else %}
+                - <span style="color: gray;">{{ status }}</span>
+            {% endif %}
         </li>
     {% endfor %}
 </ul>
+
+
+
 
 
 

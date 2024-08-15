@@ -1,22 +1,33 @@
 <!-- accounts/templates/accounts/quest_detail.html -->
 
-{% extends "base_generic.html" %}
+<h1>{{ quest.title }}</h1>
 
-{% block content %}
-  <h1>{{ quest.title }}</h1>
-  <p>{{ quest.question }}</p>
-  
-  <form method="post">
+<form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Ответить</button>
-  </form>
+</form>
 
-  {% if result %}
-    <p><strong>{{ result }}</strong></p>
-  {% endif %}
-  
-  <a href="{% url 'profile' %}">Назад в профиль</a>
-{% endblock %}
+{% if result %}
+    <h2>Результаты:</h2>
+    <ul>
+        {% for question, res in result %}
+            <li>{{ question.question_text }} - {{ res }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if quest_progress.is_completed %}
+    <p>Вы уже прошли этот квест.</p>
+{% else %}
+    <p>Вы не прошли этот квест.</p>
+{% endif %}
+
+
+
+
+
+
+
 
 
