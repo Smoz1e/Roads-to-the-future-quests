@@ -20,6 +20,7 @@ class Question(models.Model):
     quest = models.ForeignKey(Quest, related_name='questions', on_delete=models.CASCADE)
     question_text = models.TextField()
     correct_answer = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='questions/', blank=True, null=True)  # поле для картинки
 
     def __str__(self):
         return f'Вопрос: {self.question_text}'

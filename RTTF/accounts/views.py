@@ -78,8 +78,6 @@ def quest_detail(request, quest_id):
     quest_progress, created = QuestProgress.objects.get_or_create(user=user, quest=quest)
     result = []
 
-    logger.debug(f"QuestProgress for user {user.id} and quest {quest.id}: {quest_progress}")
-
     if request.method == 'POST':
         form = QuestAnswerForm(request.POST, quest=quest)
         if form.is_valid():
@@ -102,7 +100,6 @@ def quest_detail(request, quest_id):
             else:
                 quest_progress.is_completed = False
                 quest_progress.save()
-
     else:
         form = QuestAnswerForm(quest=quest)
 

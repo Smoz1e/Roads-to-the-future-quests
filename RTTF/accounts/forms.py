@@ -26,14 +26,12 @@ class UserLoginForm(AuthenticationForm):
 
 class QuestAnswerForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        quest = kwargs.pop('quest', None)
+        quest = kwargs.pop('quest')
         super().__init__(*args, **kwargs)
-        if quest:
-            for question in quest.questions.all():
-                self.fields[f'question_{question.id}'] = forms.CharField(
-                    label=question.question_text,
-                    widget=forms.Textarea,
-                    required=True
-                )
+        for question in quest.questions.all():
+            self.fields[f'question_{question.id}'] = forms.CharField(
+                label=question.question_text,
+                widget=forms.TextInput(attrs={'placeholder': 'Введите ваш ответ'})
+            )
 
 
