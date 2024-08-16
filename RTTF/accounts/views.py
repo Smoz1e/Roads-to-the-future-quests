@@ -72,6 +72,14 @@ def logout_view(request):
 logger = logging.getLogger(__name__)
 
 # views.py
+import logging
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Quest, QuestProgress, Question
+from .forms import QuestAnswerForm
+
+logger = logging.getLogger(__name__)
+
 @login_required
 def quest_detail(request, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
@@ -83,6 +91,21 @@ def quest_detail(request, quest_id):
     correct_answers_count = request.session.get(f'correct_answers_count_{quest_id}', 0)
 
     if request.method == 'POST':
+        if 'restart' in request.POST:
+            # Логирование для отладки
+            logger.debug(f"User {user.id} нажал 'Начать заново' для квеста {quest_id}")
+            
+            # Если пользователь нажал "Начать заново", очищаем сессию и прогресс квеста
+            request.session.pop(f'saved_answers_{quest_id}', None)
+            request.session.pop(f'correct_answers_count_{quest_id}', None)
+            quest_progress.is_completed = False
+            quest_progress.save()
+            
+            # Логирование для подтверждения сброса
+            logger.debug(f"Прогресс для квеста {quest_id} у пользователя {user.id} был сброшен")
+            
+            return redirect('quest_detail', quest_id=quest_id)
+        
         question_id = request.POST.get('question_id')
         question = get_object_or_404(Question, pk=question_id)
 
