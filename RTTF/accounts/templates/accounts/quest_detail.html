@@ -1,37 +1,36 @@
-<!-- accounts/templates/accounts/quest_detail.html -->
 <h1>{{ quest.title }}</h1>
 
-<form method="post">
-    {% csrf_token %}
-    {% for question in quest.questions.all %}
-        <div class="question">
-            <p>{{ question.question_text }}</p>
-            {% if question.image %}
-                <img src="{{ question.image.url }}" alt="Question Image" style="max-width: 300px;">
-            {% endif %}
-            <label for="id_question_{{ question.id }}">Ваш ответ:</label>
-            <input type="text" name="question_{{ question.id }}" id="id_question_{{ question.id }}" placeholder="Введите ваш ответ">
-            {% for q, res in result %}
-                {% if q == question %}
-                    <p class="response-message">{{ res }}</p>
-                {% endif %}
-            {% endfor %}
-        </div>
-    {% endfor %}
-    <button type="submit">Проверить ответы</button>
-</form>
+{% for question, form in forms %}
+    <div class="question">
+        <p>{{ form.label_tag }}:</p>
+        {% if question.image %}
+            <img src="{{ question.image.url }}" alt="Question Image" style="max-width: 300px;">
+        {% endif %}
+        
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="hidden" name="question_id" value="{{ question.id }}">
+            <button type="submit">Ответ</button>
+        </form>
 
-{% for q, res in result %}
-    {% if not q %}
-        <h2>{{ res }}</h2>
-    {% endif %}
+        {% if form.is_correct is not None %}
+            <p class="response-message">
+                {{ form.response_text }} 
+                {% if form.is_correct %}
+                    (Верно!)
+                {% else %}
+                    (Неверно!)
+                {% endif %}
+            </p>
+        {% endif %}
+    </div>
 {% endfor %}
 
 {% if quest_progress.is_completed %}
     <p>Вы уже прошли этот квест.</p>
-{% else %}
-    <p>Вы не прошли этот квест.</p>
 {% endif %}
+
 
 
 

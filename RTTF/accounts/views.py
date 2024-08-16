@@ -77,41 +77,77 @@ def quest_detail(request, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
     user = request.user
     quest_progress, created = QuestProgress.objects.get_or_create(user=user, quest=quest)
-    result = []
+    
+    # Получение сохраненных ответов из сессии
+    saved_answers = request.session.get(f'saved_answers_{quest_id}', {})
+    correct_answers_count = request.session.get(f'correct_answers_count_{quest_id}', 0)
 
     if request.method == 'POST':
-        form = QuestAnswerForm(request.POST, quest=quest)
-        if form.is_valid():
-            all_correct = True
-            for question in quest.questions.all():
-                user_answer = form.cleaned_data.get(f'question_{question.id}', '').strip().lower()
-                correct_answer = question.correct_answer.strip().lower()
-                if user_answer != correct_answer:
-                    all_correct = False
-                    result.append((question, 'Неверно, попробуйте еще раз.'))
-                else:
-                    success_message = question.success_message or 'Верно!'
-                    result.append((question, success_message))
+        question_id = request.POST.get('question_id')
+        question = get_object_or_404(Question, pk=question_id)
 
-            if all_correct:
+        form = QuestAnswerForm(request.POST, question=question)
+
+        if form.is_valid():
+            user_answer = form.cleaned_data['answer'].strip().lower()
+            correct_answer = question.correct_answer.strip().lower()
+
+            if user_answer == correct_answer:
+                form.set_is_correct(True)
+                form.set_response_text(question.success_message or 'Верно!')
+                correct_answers_count += 1
+            else:
+                form.set_is_correct(False)
+                form.set_response_text('Неверно, попробуйте еще раз.')
+
+            # Сохраняем результат в сессию
+            saved_answers[str(question.id)] = {
+                'answer': user_answer,
+                'is_correct': form.is_correct,
+                'response_text': form.response_text,
+            }
+            request.session[f'saved_answers_{quest_id}'] = saved_answers
+            request.session[f'correct_answers_count_{quest_id}'] = correct_answers_count
+
+            # Проверяем, пройдены ли все вопросы
+            if correct_answers_count == quest.questions.count():
                 quest_progress.is_completed = True
                 quest_progress.save()
-                logger.debug(f"Quest completed by user {user.id} for quest {quest.id}")
-                result.append((None, "Вы успешно прошли этот квест!"))
+                request.session[f'quest_completed_{quest_id}'] = True
             else:
                 quest_progress.is_completed = False
                 quest_progress.save()
-        else:
-            form = QuestAnswerForm(quest=quest)
+
+        forms = []
+        for question in quest.questions.all():
+            form_key = str(question.id)
+            form_initial = {
+                'answer': saved_answers.get(form_key, {}).get('answer', ''),
+            }
+            form = QuestAnswerForm(initial=form_initial, question=question)
+            form.set_is_correct(saved_answers.get(form_key, {}).get('is_correct'))
+            form.set_response_text(saved_answers.get(form_key, {}).get('response_text'))
+            forms.append((question, form))
+
     else:
-        form = QuestAnswerForm(quest=quest)
+        forms = []
+        for question in quest.questions.all():
+            form_key = str(question.id)
+            form_initial = {
+                'answer': saved_answers.get(form_key, {}).get('answer', ''),
+            }
+            form = QuestAnswerForm(initial=form_initial, question=question)
+            form.set_is_correct(saved_answers.get(form_key, {}).get('is_correct'))
+            form.set_response_text(saved_answers.get(form_key, {}).get('response_text'))
+            forms.append((question, form))
 
     return render(request, 'accounts/quest_detail.html', {
         'quest': quest,
-        'form': form,
-        'result': result,
+        'forms': forms,
         'quest_progress': quest_progress,
     })
+
+
 
 
 

@@ -26,17 +26,23 @@ class UserLoginForm(AuthenticationForm):
 
 class QuestAnswerForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        quest = kwargs.pop('quest')
+        question = kwargs.pop('question')
         super().__init__(*args, **kwargs)
 
-        for question in quest.questions.all():
-            self.fields[f'question_{question.id}'] = forms.CharField(
-                label=question.question_text,
-                widget=forms.TextInput(attrs={'placeholder': 'Введите ваш ответ'})
-            )
-            self.fields[f'submit_{question.id}'] = forms.BooleanField(
-                required=False,
-                widget=forms.HiddenInput()
-            )
+        self.fields['answer'] = forms.CharField(
+            label=question.question_text,
+            widget=forms.TextInput(attrs={'placeholder': 'Введите ваш ответ'}),
+            required=True
+        )
+
+        # Поле для сохранения правильности ответа
+        self.is_correct = None
+        self.response_text = None
+
+    def set_is_correct(self, is_correct):
+        self.is_correct = is_correct
+
+    def set_response_text(self, response_text):
+        self.response_text = response_text
 
 
