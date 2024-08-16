@@ -17,8 +17,3 @@ class QuestionAdmin(admin.ModelAdmin):
 class QuestProgressAdmin(admin.ModelAdmin):
     list_display = ('user', 'quest', 'is_completed')
     list_filter = ('is_completed', 'user', 'quest')
-
-
-
-
-

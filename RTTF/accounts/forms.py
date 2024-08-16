@@ -30,7 +30,7 @@ class QuestAnswerForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         self.fields['answer'] = forms.CharField(
-            label=question.question_text,
+#            label=question.question_text,
             widget=forms.TextInput(attrs={'placeholder': 'Введите ваш ответ'}),
             required=True
         )
