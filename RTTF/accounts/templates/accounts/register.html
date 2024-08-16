@@ -1,16 +1,138 @@
-{% extends "base_generic.html" %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #F8F8F8;
+        }
 
-{% block content %}
-  <h2>Регистрация</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    {{ form.first_name.label_tag }} {{ form.first_name }}
-    {{ form.last_name.label_tag }} {{ form.last_name }}
-    {{ form.phone_number.label_tag }} {{ form.phone_number }}
-    {{ form.username.label_tag }} {{ form.username }}
-    {{ form.password1.label_tag }} {{ form.password1 }}
-    {{ form.password2.label_tag }} {{ form.password2 }}
-    <button type="submit">Регистрация</button>
-  </form>
-{% endblock %}
+        .registration-container {
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 30px;
+            overflow: hidden;
+            border: 1px solid #E0D5D0;
+        }
+
+        .registration-container h2 {
+            color: #DCBEB5;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .registration-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .registration-form label {
+            display: block;
+            color: #333333;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .registration-form input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #DCBEB5;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            color: #333333;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .registration-form input:focus {
+            border-color: #F1D7D0;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+            outline: none;
+        }
+
+        .submit-button {
+            background-color: #DCBEB5;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .submit-button:hover {
+            background-color: #C7A89F;
+        }
+
+        .submit-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Для меньших экранов */
+        @media (max-width: 480px) {
+            .registration-container {
+                padding: 20px;
+            }
+
+            .registration-container h2 {
+                font-size: 20px;
+            }
+
+            .registration-form input {
+                font-size: 14px;
+            }
+
+            .submit-button {
+                font-size: 14px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-container">
+        <h2>Регистрация</h2>
+        <form method="post" class="registration-form">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.non_field_errors }}
+            </div>
+            <div class="form-group">
+                {{ form.first_name.label_tag }} {{ form.first_name }}
+            </div>
+            <div class="form-group">
+                {{ form.last_name.label_tag }} {{ form.last_name }}
+            </div>
+            <div class="form-group">
+                {{ form.phone_number.label_tag }} {{ form.phone_number }}
+            </div>
+            <div class="form-group">
+                {{ form.username.label_tag }} {{ form.username }}
+            </div>
+            <div class="form-group">
+                {{ form.password1.label_tag }} {{ form.password1 }}
+            </div>
+            <div class="form-group">
+                {{ form.password2.label_tag }} {{ form.password2 }}
+            </div>
+            <button type="submit" class="submit-button">Регистрация</button>
+        </form>
+    </div>
+</body>
+</html>
+
