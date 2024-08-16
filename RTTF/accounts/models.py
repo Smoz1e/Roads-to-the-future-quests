@@ -21,11 +21,13 @@ class Question(models.Model):
     quest = models.ForeignKey(Quest, related_name='questions', on_delete=models.CASCADE)
     question_text = models.TextField()
     correct_answer = models.CharField(max_length=200)
-    image = models.ImageField(upload_to='questions/', blank=True, null=True)  # поле для картинки
-    success_message = models.TextField(blank=True, null=True)  # новое поле для текста успешного ответа
+    image = models.ImageField(upload_to='questions/', blank=True, null=True)  # изображение для вопроса
+    success_message = models.TextField(blank=True, null=True)  # текст успешного ответа
+    success_image = models.ImageField(upload_to='success_images/', blank=True, null=True)  # изображение успешного ответа
 
     def __str__(self):
         return f'Вопрос: {self.question_text}'
+
 
 
 class QuestProgress(models.Model):

@@ -25,6 +25,10 @@
                         (Неверно!)
                     {% endif %}
                 </p>
+                <!-- Отображение изображения после правильного ответа -->
+                {% if form.is_correct and question.success_image %}
+                    <img src="{{ question.success_image.url }}" alt="Success Image" style="max-width: 300px; margin-top: 10px;">
+                {% endif %}
             {% endif %}
         </div>
     {% endfor %}
@@ -42,6 +46,7 @@
 {% if quest_progress.is_completed %}
     <p>Вы уже прошли этот квест.</p>
 {% endif %}
+
 
 
 
