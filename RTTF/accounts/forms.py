@@ -21,8 +21,8 @@ class UserRegisterForm(UserCreationForm):
         }
 
 class UserLoginForm(AuthenticationForm):
-    username = forms.CharField(label='Username', widget=forms.TextInput())
-    password = forms.CharField(label='Password', widget=forms.PasswordInput())
+    username = forms.CharField(label='Логин', widget=forms.TextInput())
+    password = forms.CharField(label='Пароль', widget=forms.PasswordInput())
 
 class QuestAnswerForm(forms.Form):
     def __init__(self, *args, **kwargs):
