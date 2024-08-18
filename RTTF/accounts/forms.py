@@ -6,14 +6,19 @@ from django.contrib.auth import get_user_model
 
 CustomUser = get_user_model()
 
+
 class UserRegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True, label='Имя')
     last_name = forms.CharField(max_length=30, required=True, label='Фамилия')
     phone_number = forms.CharField(max_length=15, required=True, label='Номер телефона')
 
+    # Добавляем поле класса
+    CLASS_CHOICES = [(str(i), str(i)) for i in range(4, 12)]
+    class_user = forms.ChoiceField(choices=CLASS_CHOICES, required=True, label='Класс')
+
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'phone_number', 'username', 'password1', 'password2']
+        fields = ['first_name', 'last_name', 'phone_number', 'class_user', 'username', 'password1', 'password2']
         labels = {
             'username': 'Логин',
             'password1': 'Пароль',

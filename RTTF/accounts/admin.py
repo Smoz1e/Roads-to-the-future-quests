@@ -3,7 +3,8 @@ from .models import CustomUser, Quest, Question, QuestProgress
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'first_name', 'last_name', 'phone_number')
+    list_display = ('username', 'first_name', 'last_name', 'phone_number', 'class_user')
+    list_filter = ('class_user',)
 
 @admin.register(Quest)
 class QuestAdmin(admin.ModelAdmin):

@@ -1,11 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+
 class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=30, blank=True, null=True)
     last_name = models.CharField(max_length=30, blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     quests = models.ManyToManyField('Quest', through='QuestProgress', related_name='users', blank=True)
+
+    # Поле для указания класса
+    CLASS_CHOICES = [(str(i), str(i)) for i in range(4, 12)]
+    class_user = models.CharField(max_length=2, choices=CLASS_CHOICES, blank=False, null=False)
 
     def __str__(self):
         return self.username
