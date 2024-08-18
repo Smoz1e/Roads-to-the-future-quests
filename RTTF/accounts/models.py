@@ -1,11 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.core.validators import RegexValidator
 
 class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=30, blank=True, null=True)
     last_name = models.CharField(max_length=30, blank=True, null=True)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    phone_number = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True,
+        unique=True,  # Обеспечивает уникальность значений в этом поле
+        validators=[
+            RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Номер телефона должен быть введен в правильном формате.")
+        ]
+    )
     quests = models.ManyToManyField('Quest', through='QuestProgress', related_name='users', blank=True)
 
     # Поле для указания класса
