@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Топ пользователей по времени прохождения квестов</title>
+    <style>
+        .user-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .user-item {
+            margin-bottom: 10px;
+        }
+        .user-time {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Топ пользователи по времени прохождения квестов</h1>
+    <ul class="user-list">
+        {% for user, total_duration in sorted_users %}
+            <li class="user-item">
+                <strong>{{ user.username }} ({{ user.first_name }} {{ user.last_name }})</strong>
+                <span class="user-time">
+                    {% if total_duration %}
+                        Время прохождения: {{ total_duration }}
+                    {% else %}
+                        Время прохождения не доступно
+                    {% endif %}
+                </span>
+            </li>
+        {% empty %}
+            <li>Нет пользователей с завершенными квестами.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+
+
+
+

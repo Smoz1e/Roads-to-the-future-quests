@@ -18,7 +18,7 @@ class CustomUser(AbstractUser):
 
     # Поле для указания класса
     CLASS_CHOICES = [(str(i), str(i)) for i in range(4, 12)]
-    class_user = models.CharField(max_length=2, choices=CLASS_CHOICES, blank=False, null=False)
+    class_user = models.CharField(max_length=2, choices=CLASS_CHOICES,default='5', blank=False, null=False)
 
     def __str__(self):
         return self.username
@@ -41,18 +41,26 @@ class Question(models.Model):
     def __str__(self):
         return f'Вопрос: {self.question_text}'
 
-
-
+from django.utils import timezone
+from datetime import timedelta
 class QuestProgress(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     quest = models.ForeignKey(Quest, on_delete=models.CASCADE)
     is_completed = models.BooleanField(default=False)
+    started_at = models.DateTimeField(null=True, blank=True)  # Время начала квеста
+    completed_at = models.DateTimeField(null=True, blank=True)  # Время завершения квеста
 
     class Meta:
         unique_together = ('user', 'quest')
 
     def __str__(self):
         return f'{self.user.username} - {self.quest.title} - {"Пройдено" if self.is_completed else "Не пройдено"}'
+
+    def get_duration(self):
+        if self.started_at and self.completed_at:
+            return self.completed_at - self.started_at
+        return None
+
 
 
 
