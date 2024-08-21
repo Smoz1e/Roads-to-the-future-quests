@@ -186,7 +186,7 @@
             <ul class="quest-list">
                 {% for quest, status in quest_status %}
                     <li>
-                        <a href="{% url 'quest_detail' quest.id %}">{{ quest.title }}</a>
+                        <a href="{% url 'start_quest' quest.id %}">{{ quest.title }}</a>
                         <span class="status {% if status == 'Пройдено' %}completed{% elif status == 'Не пройдено' %}not-completed{% else %}in-progress{% endif %}">{{ status }}</span>
                     </li>
                 {% endfor %}

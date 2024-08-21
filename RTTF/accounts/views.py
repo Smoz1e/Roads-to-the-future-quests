@@ -16,7 +16,6 @@ def home(request):
 
 # Профиль пользователя
 # accounts/views.py
-
 @login_required
 def profile(request):
     user = request.user
@@ -28,6 +27,9 @@ def profile(request):
         if quest_progress:
             if quest_progress.is_completed:
                 status = "Пройдено"
+                duration = quest_progress.get_duration()
+                if duration:
+                    status += f" (Время прохождения: {duration})"
             else:
                 status = "Не пройдено"
         else:
@@ -38,6 +40,35 @@ def profile(request):
         'user': user,
         'quest_status': quest_status,
     })
+
+
+@login_required
+def start_quest(request, quest_id):
+    user = request.user
+    quest = get_object_or_404(Quest, id=quest_id)
+
+    quest_progress, created = QuestProgress.objects.get_or_create(user=user, quest=quest)
+
+    if not quest_progress.started_at:
+        quest_progress.started_at = timezone.now()
+        quest_progress.save()
+
+    return redirect('quest_detail', quest_id=quest.id)
+
+
+@login_required
+def complete_quest(request, quest_id):
+    user = request.user
+    quest = get_object_or_404(Quest, id=quest_id)
+
+    quest_progress, created = QuestProgress.objects.get_or_create(user=user, quest=quest)
+
+    if not quest_progress.is_completed:
+        quest_progress.is_completed = True
+        quest_progress.completed_at = timezone.now()
+        quest_progress.save()
+
+    return redirect('profile')
 
 
 # Регистрация
@@ -69,8 +100,6 @@ def logout_view(request):
     return redirect('login')
 
 # Детали квеста
-logger = logging.getLogger(__name__)
-
 # views.py
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
@@ -170,8 +199,30 @@ def quest_detail(request, quest_id):
         'quest_progress': quest_progress,
     })
 
+from django.utils import timezone
+from datetime import timedelta
 
+def top_user(request):
+    # Получаем записи QuestProgress для всех завершенных квестов
+    completed_quests = QuestProgress.objects.filter(is_completed=True).exclude(completed_at__isnull=True).order_by('completed_at')
 
+    # Создаем словарь для хранения пользователей и их времени прохождения квестов
+    user_durations = {}
+
+    for progress in completed_quests:
+        user = progress.user
+        duration = progress.get_duration()
+
+        if user not in user_durations:
+            user_durations[user] = timedelta()
+
+        if duration:
+            user_durations[user] += duration
+
+    # Создаем отсортированный список пользователей по времени прохождения квестов
+    sorted_users = sorted(user_durations.items(), key=lambda x: x[1])
+
+    return render(request, 'accounts/top_user.html', {'sorted_users': sorted_users})
 
 
 
