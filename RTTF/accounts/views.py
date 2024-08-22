@@ -106,6 +106,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Quest, QuestProgress, Question
 from .forms import QuestAnswerForm
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -114,25 +115,26 @@ def quest_detail(request, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
     user = request.user
     quest_progress, created = QuestProgress.objects.get_or_create(user=user, quest=quest)
-    
+
+    # Если квест начат, но время не установлено, установим его
+    if not quest_progress.started_at:
+        quest_progress.started_at = timezone.now()
+        quest_progress.save()
+
     # Получение сохраненных ответов из сессии
     saved_answers = request.session.get(f'saved_answers_{quest_id}', {})
     correct_answers_count = request.session.get(f'correct_answers_count_{quest_id}', 0)
 
     if request.method == 'POST':
         if 'restart' in request.POST:
-            # Логирование для отладки
             logger.debug(f"User {user.id} нажал 'Начать заново' для квеста {quest_id}")
-            
-            # Если пользователь нажал "Начать заново", очищаем сессию и прогресс квеста
             request.session.pop(f'saved_answers_{quest_id}', None)
             request.session.pop(f'correct_answers_count_{quest_id}', None)
             quest_progress.is_completed = False
+            quest_progress.started_at = timezone.now()  # Сбрасываем время начала
+            quest_progress.completed_at = None  # Очищаем время завершения
             quest_progress.save()
-            
-            # Логирование для подтверждения сброса
             logger.debug(f"Прогресс для квеста {quest_id} у пользователя {user.id} был сброшен")
-            
             return redirect('quest_detail', quest_id=quest_id)
         
         question_id = request.POST.get('question_id')
@@ -164,6 +166,7 @@ def quest_detail(request, quest_id):
             # Проверяем, пройдены ли все вопросы
             if correct_answers_count == quest.questions.count():
                 quest_progress.is_completed = True
+                quest_progress.completed_at = timezone.now()  # Устанавливаем время завершения
                 quest_progress.save()
                 request.session[f'quest_completed_{quest_id}'] = True
             else:
@@ -201,28 +204,54 @@ def quest_detail(request, quest_id):
 
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Sum, F
 
+
+@login_required
 def top_user(request):
-    # Получаем записи QuestProgress для всех завершенных квестов
-    completed_quests = QuestProgress.objects.filter(is_completed=True).exclude(completed_at__isnull=True).order_by('completed_at')
+    # Получаем класс из GET-запроса для фильтрации
+    selected_class = request.GET.get('class_user', None)
 
-    # Создаем словарь для хранения пользователей и их времени прохождения квестов
-    user_durations = {}
+    # Получаем записи QuestProgress для всех завершенных квестов
+    completed_quests = QuestProgress.objects.filter(is_completed=True).exclude(completed_at__isnull=True)
+
+    # Фильтруем по выбранному классу, если он задан
+    if selected_class:
+        completed_quests = completed_quests.filter(user__class_user=selected_class)
+
+    # Получаем параметры сортировки из GET-запроса
+    sort_by = request.GET.get('sort_by', 'user')  # По умолчанию сортировка по имени пользователя
+
+    # Фильтрация и сортировка
+    if sort_by == 'quest_title':
+        completed_quests = completed_quests.order_by('quest__title')
+    elif sort_by == 'user_class':
+        completed_quests = completed_quests.order_by('user__class_user')
+    else:
+        completed_quests = completed_quests.order_by('user')
+
+    # Создаем словарь для хранения пользователей и их квестов с временем прохождения
+    user_quests = {}
 
     for progress in completed_quests:
         user = progress.user
+        quest = progress.quest
         duration = progress.get_duration()
 
-        if user not in user_durations:
-            user_durations[user] = timedelta()
+        if user not in user_quests:
+            user_quests[user] = []
 
-        if duration:
-            user_durations[user] += duration
+        user_quests[user].append((quest.title, duration))
 
-    # Создаем отсортированный список пользователей по времени прохождения квестов
-    sorted_users = sorted(user_durations.items(), key=lambda x: x[1])
+    # Сортируем пользователей по выбранному критерию
+    sorted_users = sorted(user_quests.items(), key=lambda x: user_quests[x[0]])
 
-    return render(request, 'accounts/top_user.html', {'sorted_users': sorted_users})
+    return render(request, 'accounts/top_user.html', {
+        'sorted_users': sorted_users,
+        'sort_by': sort_by,
+        'selected_class': selected_class,
+        'classes': CustomUser.CLASS_CHOICES,  # Передаем возможные классы в шаблон
+    })
 
 
 

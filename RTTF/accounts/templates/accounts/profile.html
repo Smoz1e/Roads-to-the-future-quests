@@ -132,6 +132,24 @@
             background-color: #D32F2F; /* Темный красный */
             transform: scale(1.05);
         }
+        
+                /* Стили для кнопки "Вернуться в профиль" */
+        .btn-top-user {
+            display: block;
+            background-color: #5C4033;
+            color: #fff;
+            text-align: center;
+            padding: 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 16px;
+            margin: 10px auto 20px auto;
+            transition: background-color 0.3s ease;
+            max-width: 600px;
+        }
+        .btn-top-user:hover {
+            background-color: #483127; /* Цвет кнопки при наведении */
+        }
 
         @keyframes fadeIn {
             from {
@@ -187,12 +205,17 @@
                 {% for quest, status in quest_status %}
                     <li>
                         <a href="{% url 'start_quest' quest.id %}">{{ quest.title }}</a>
-                        <span class="status {% if status == 'Пройдено' %}completed{% elif status == 'Не пройдено' %}not-completed{% else %}in-progress{% endif %}">{{ status }}</span>
+                        <span class="status 
+                            {% if 'Пройдено' in status %}completed
+                            {% elif 'Не пройдено' in status %}not-completed
+                            {% else %}in-progress
+                            {% endif %}">{{ status }}</span>
+
                     </li>
                 {% endfor %}
             </ul>
         </div>
-        
+        <a href="{% url 'top_user' %}" class="btn-top-user">Список лидеров</a>
         <a href="{% url 'logout' %}" class="logout-button">Выйти</a>
     </div>
 </body>

@@ -9,26 +9,54 @@
             padding: 0;
         }
         .user-item {
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
-        .user-time {
+        .quest-item {
+            margin-left: 20px;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
     <h1>Топ пользователи по времени прохождения квестов</h1>
+    
+    <!-- Фильтры для сортировки -->
+    <form method="GET" action="{% url 'top_user' %}">
+        <label for="sort_by">Сортировать по:</label>
+        <select name="sort_by" id="sort_by" onchange="this.form.submit()">
+            <option value="user" {% if sort_by == 'user' %}selected{% endif %}>Имя пользователя</option>
+            <option value="quest_title" {% if sort_by == 'quest_title' %}selected{% endif %}>Название квеста</option>
+            <option value="user_class" {% if sort_by == 'user_class' %}selected{% endif %}>Класс пользователя</option>
+        </select>
+
+        <!-- Фильтр по классу -->
+        <label for="class_user">Фильтровать по классу:</label>
+        <select name="class_user" id="class_user" onchange="this.form.submit()">
+            <option value="">Все классы</option>
+            {% for value, label in classes %}
+                <option value="{{ value }}" {% if selected_class == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
     <ul class="user-list">
-        {% for user, total_duration in sorted_users %}
+        {% for user, quests in sorted_users %}
             <li class="user-item">
-                <strong>{{ user.username }} ({{ user.first_name }} {{ user.last_name }})</strong>
-                <span class="user-time">
-                    {% if total_duration %}
-                        Время прохождения: {{ total_duration }}
-                    {% else %}
-                        Время прохождения не доступно
-                    {% endif %}
-                </span>
+                <strong>{{ user.username }} ({{ user.first_name }} {{ user.last_name }})</strong> - Класс: {{ user.class_user }}
+                <ul>
+                    {% for quest_title, duration in quests %}
+                        <li class="quest-item">
+                            {{ quest_title }} - Время прохождения: 
+                            {% if duration %}
+                                {{ duration }}
+                            {% else %}
+                                не завершено
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
             </li>
         {% empty %}
             <li>Нет пользователей с завершенными квестами.</li>
@@ -36,6 +64,9 @@
     </ul>
 </body>
 </html>
+
+
+
 
 
 
