@@ -2,18 +2,185 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Топ пользователей по времени прохождения квестов</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F1D7D0;
+            color: #5A3A31;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: #8A5A53;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        form {
+            max-width: 600px;  /* Ограничение максимальной ширины формы */
+            margin: 0 auto 20px auto;
+            background-color: #DCBEB5;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            animation: slideDown 0.5s ease-in-out;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        select {
+            padding: 10px;
+            border: 1px solid #8A5A53;
+            border-radius: 5px;
+            background-color: #F1D7D0;
+            color: #5A3A31;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        select:hover {
+            background-color: #DCBEB5;
+        }
+
         .user-list {
             list-style-type: none;
             padding: 0;
+            max-width: 600px;  /* Ограничение максимальной ширины списка пользователей */
+            margin: 0 auto;
         }
+
         .user-item {
+            background-color: #DCBEB5;
             margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.5s ease-in-out;
         }
+
+        .user-item strong {
+            font-size: 1.2rem;
+            color: #5A3A31;
+        }
+
         .quest-item {
-            margin-left: 20px;
+            margin-left: 10px;
             font-weight: bold;
+            color: #8A5A53;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Медиазапросы для мобильных устройств */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+
+            form {
+                padding: 10px;
+                gap: 10px;
+            }
+
+            label {
+                font-size: 0.9rem;
+            }
+
+            select {
+                font-size: 0.9rem;
+            }
+
+            .user-item {
+                padding: 15px;
+            }
+
+            .user-item strong {
+                font-size: 1rem;
+            }
+
+            .quest-item {
+                margin-left: 5px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 10px;
+            }
+
+            form {
+                padding: 8px;
+                gap: 8px;
+            }
+
+            label {
+                font-size: 0.8rem;
+            }
+
+            select {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+
+            .user-item {
+                padding: 10px;
+            }
+
+            .user-item strong {
+                font-size: 0.9rem;
+            }
+
+            .quest-item {
+                font-size: 0.8rem;
+            }
+        }
+        
+                /* Стили для кнопки "Вернуться в профиль" */
+        .btn-primary {
+            display: block;
+            background-color: #5C4033;
+            color: #fff;
+            text-align: center;
+            padding: 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 16px;
+            margin: 10px auto 20px auto;
+            transition: background-color 0.3s ease;
+            max-width: 600px;
+        }
+        .btn-primary:hover {
+            background-color: #483127; /* Цвет кнопки при наведении */
         }
     </style>
 </head>
@@ -39,6 +206,17 @@
                 </option>
             {% endfor %}
         </select>
+
+        <!-- Фильтр по названию квеста -->
+        <label for="quest_id">Фильтровать по квесту:</label>
+        <select name="quest_id" id="quest_id" onchange="this.form.submit()">
+            <option value="">Все квесты</option>
+            {% for quest in quests %}
+                <option value="{{ quest.id }}" {% if selected_quest == quest.id|stringformat:"s" %}selected{% endif %}>
+                    {{ quest.title }}
+                </option>
+            {% endfor %}
+        </select>
     </form>
 
     <ul class="user-list">
@@ -58,12 +236,19 @@
                     {% endfor %}
                 </ul>
             </li>
+            
         {% empty %}
             <li>Нет пользователей с завершенными квестами.</li>
         {% endfor %}
     </ul>
+
+    <a href="{% url 'profile' %}" class="btn-primary">Вернуться в профиль</a>
 </body>
 </html>
+
+
+
+
 
 
 

@@ -209,8 +209,9 @@ from django.db.models import Sum, F
 
 @login_required
 def top_user(request):
-    # Получаем класс из GET-запроса для фильтрации
+    # Получаем класс и название квеста из GET-запроса для фильтрации
     selected_class = request.GET.get('class_user', None)
+    selected_quest = request.GET.get('quest_id', None)
 
     # Получаем записи QuestProgress для всех завершенных квестов
     completed_quests = QuestProgress.objects.filter(is_completed=True).exclude(completed_at__isnull=True)
@@ -219,10 +220,14 @@ def top_user(request):
     if selected_class:
         completed_quests = completed_quests.filter(user__class_user=selected_class)
 
+    # Фильтруем по выбранному квесту, если он задан
+    if selected_quest:
+        completed_quests = completed_quests.filter(quest_id=selected_quest)
+
     # Получаем параметры сортировки из GET-запроса
     sort_by = request.GET.get('sort_by', 'user')  # По умолчанию сортировка по имени пользователя
 
-    # Фильтрация и сортировка
+    # Сортировка по выбранному критерию
     if sort_by == 'quest_title':
         completed_quests = completed_quests.order_by('quest__title')
     elif sort_by == 'user_class':
@@ -244,13 +249,15 @@ def top_user(request):
         user_quests[user].append((quest.title, duration))
 
     # Сортируем пользователей по выбранному критерию
-    sorted_users = sorted(user_quests.items(), key=lambda x: user_quests[x[0]])
+    sorted_users = sorted(user_quests.items(), key=lambda x: x[0].username.lower())
 
     return render(request, 'accounts/top_user.html', {
         'sorted_users': sorted_users,
         'sort_by': sort_by,
         'selected_class': selected_class,
+        'selected_quest': selected_quest,
         'classes': CustomUser.CLASS_CHOICES,  # Передаем возможные классы в шаблон
+        'quests': Quest.objects.all(),  # Передаем все квесты в шаблон для фильтрации
     })
 
 
