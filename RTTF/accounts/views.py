@@ -6,10 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from .forms import UserRegisterForm, UserLoginForm, QuestAnswerForm
-from .models import CustomUser, Quest
-from .forms import QuestAnswerForm
-from .models import Quest, QuestProgress, Question
+from .models import CustomUser, Quest, QuestProgress, Question
 import logging
+from django.utils import timezone
+
+
 # Домашняя страничка сайта
 def home(request):
     return render(request, 'home.html')  # Шаблон домашней страницы
