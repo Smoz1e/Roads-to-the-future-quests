@@ -208,16 +208,20 @@ from datetime import timedelta
 from django.db.models import Sum, F
 
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import QuestProgress, Quest, CustomUser
+
 @login_required
 def top_user(request):
-    # Получаем класс и название квеста из GET-запроса для фильтрации
+    # Получаем класс или статус и название квеста из GET-запроса для фильтрации
     selected_class = request.GET.get('class_user', None)
     selected_quest = request.GET.get('quest_id', None)
 
     # Получаем записи QuestProgress для всех завершенных квестов
     completed_quests = QuestProgress.objects.filter(is_completed=True).exclude(completed_at__isnull=True)
 
-    # Фильтруем по выбранному классу, если он задан
+    # Фильтруем по выбранному классу или статусу, если он задан
     if selected_class:
         completed_quests = completed_quests.filter(user__class_user=selected_class)
 
@@ -234,7 +238,7 @@ def top_user(request):
     elif sort_by == 'user_class':
         completed_quests = completed_quests.order_by('user__class_user')
     else:
-        completed_quests = completed_quests.order_by('user')
+        completed_quests = completed_quests.order_by('user__username')
 
     # Создаем словарь для хранения пользователей и их квестов с временем прохождения
     user_quests = {}
@@ -249,7 +253,7 @@ def top_user(request):
 
         user_quests[user].append((quest.title, duration))
 
-    # Сортируем пользователей по выбранному критерию
+    # Сортируем пользователей по имени пользователя
     sorted_users = sorted(user_quests.items(), key=lambda x: x[0].username.lower())
 
     return render(request, 'accounts/top_user.html', {
@@ -257,9 +261,10 @@ def top_user(request):
         'sort_by': sort_by,
         'selected_class': selected_class,
         'selected_quest': selected_quest,
-        'classes': CustomUser.CLASS_CHOICES,  # Передаем возможные классы в шаблон
+        'classes': CustomUser.CLASS_AND_STATUS_CHOICES,  # Передаем возможные классы и статусы в шаблон
         'quests': Quest.objects.all(),  # Передаем все квесты в шаблон для фильтрации
     })
+
 
 
 

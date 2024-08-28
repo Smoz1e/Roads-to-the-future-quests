@@ -16,9 +16,15 @@ class CustomUser(AbstractUser):
     )
     quests = models.ManyToManyField('Quest', through='QuestProgress', related_name='users', blank=True)
 
-    # Поле для указания класса
-    CLASS_CHOICES = [(str(i), str(i)) for i in range(4, 12)]
-    class_user = models.CharField(max_length=2, choices=CLASS_CHOICES,default='5', blank=False, null=False)
+    # Поле для указания класса и статуса пользователя
+    CLASS_CHOICES = [(str(i), str(i)) for i in range(4, 12)]  # Классы с 4 по 11
+    STATUS_CHOICES = [
+        ('student', 'Студент'),
+        ('finished', 'Закончил обучение')
+    ]
+    CLASS_AND_STATUS_CHOICES = CLASS_CHOICES + STATUS_CHOICES
+
+    class_user = models.CharField(max_length=10, choices=CLASS_AND_STATUS_CHOICES, default='5', blank=False, null=False)
 
     def __str__(self):
         return self.username

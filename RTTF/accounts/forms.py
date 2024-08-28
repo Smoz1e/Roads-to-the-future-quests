@@ -12,9 +12,16 @@ class UserRegisterForm(UserCreationForm):
     last_name = forms.CharField(max_length=30, required=True, label='Фамилия')
     phone_number = forms.CharField(max_length=15, required=True, label='Номер телефона')
 
-    # Добавляем поле класса
-    CLASS_CHOICES = [(str(i), str(i)) for i in range(4, 12)]
-    class_user = forms.ChoiceField(choices=CLASS_CHOICES, required=True, label='Класс')
+    # Объединение классов с новыми статусами
+    CLASS_CHOICES = [(str(i), str(i)) for i in range(4, 12)]  # Классы с 4 по 11
+    STATUS_CHOICES = [
+        ('student', 'Студент'),
+        ('finished', 'Закончил обучение')
+    ]
+    CLASS_AND_STATUS_CHOICES = CLASS_CHOICES + STATUS_CHOICES
+
+    # Поле класса или статуса пользователя
+    class_user = forms.ChoiceField(choices=CLASS_AND_STATUS_CHOICES, required=True, label='Класс или статус')
 
     class Meta:
         model = CustomUser
@@ -24,6 +31,12 @@ class UserRegisterForm(UserCreationForm):
             'password1': 'Пароль',
             'password2': 'Повторите пароль',
         }
+
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data.get('phone_number')
+        if CustomUser.objects.filter(phone_number=phone_number).exists():
+            raise forms.ValidationError("Пользователь с таким номером телефона уже существует.")
+        return phone_number
 
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(label='Логин', widget=forms.TextInput())
