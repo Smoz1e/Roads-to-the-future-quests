@@ -29,11 +29,15 @@
             border-radius: 8px;
             background-color: #fff;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+             overflow: hidden;
         }
         .carousel-item {
             display: none;
             padding: 20px;
             text-align: center;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
         }
         .carousel-item.active {
             display: block;
@@ -51,6 +55,9 @@
             font-size: 18px;
             margin-bottom: 10px;
             color: #333;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            text-align: left;
         }
         .carousel-controls {
             text-align: center;
@@ -160,7 +167,7 @@
         <div class="carousel-inner">
             {% for question, form in forms %}
                 <div class="carousel-item {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}">
-                    <p>{{ question.question_text }}:</p>
+                    <p>{{ question.question_text|linebreaks }}</p>
                     {% if question.image %}
                         <img src="{{ question.image.url }}" alt="Question Image">
                     {% endif %}
@@ -175,7 +182,7 @@
 
                     {% if form.is_correct is not None %}
                         <p class="response-message">
-                            {{ form.response_text }}
+                            {{ form.response_text|linebreaks }}
                             {% if form.is_correct %}
                                 (Верно!)
                             {% else %}
