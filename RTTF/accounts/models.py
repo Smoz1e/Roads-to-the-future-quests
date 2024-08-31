@@ -43,7 +43,6 @@ class Question(models.Model):
     image = models.ImageField(upload_to='questions/', blank=True, null=True)  # изображение для вопроса
     success_message = models.TextField(blank=True, null=True)  # текст успешного ответа
     success_image = models.ImageField(upload_to='success_images/', blank=True, null=True)  # изображение успешного ответа
-    external_link = models.URLField(blank=True, null=True) #Поле для ссылки на сайт
 
     def __str__(self):
         return f'Вопрос: {self.question_text}'

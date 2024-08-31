@@ -114,7 +114,7 @@
 
         /* Стили для увеличенного изображения */
         .modal {
-            display: none; /* Модальные окна по умолчанию скрыты */
+            display: none; /* Скрыть модальное окно по умолчанию */
             position: fixed;
             z-index: 1;
             left: 0;
@@ -122,7 +122,8 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4); /* Полупрозрачный фон */
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
             justify-content: center;
             align-items: center;
         }
@@ -157,7 +158,6 @@
             text-decoration: none;
             cursor: pointer;
         }
-
     </style>
 </head>
 <body>
@@ -169,15 +169,9 @@
                 <div class="carousel-item {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}">
                     <p>{{ question.question_text|linebreaks }}</p>
                     {% if question.image %}
-                        <img src="{{ question.image.url }}" alt="Question Image" class="question-img">
+                        <img src="{{ question.image.url }}" alt="Question Image">
                     {% endif %}
-                    
-                    {% if question.external_link %}
-                        <button class="open-link-btn" data-link="{{ question.external_link }}">
-                            Открыть модальное окно
-                        </button>
-                    {% endif %}
-                    
+
                     <form method="post">
                         {% csrf_token %}
                         {{ form.as_p }}
@@ -196,7 +190,7 @@
                             {% endif %}
                         </p>
                         {% if form.is_correct and question.success_image %}
-                            <img src="{{ question.success_image.url }}" alt="Success Image" class="success-img">
+                            <img src="{{ question.success_image.url }}" alt="Success Image">
                         {% endif %}
                     {% endif %}
                 </div>
@@ -220,98 +214,71 @@
         <p style="text-align: center; color: #333;">Поздравляю, вы прошли квест ✅.</p>
     {% endif %}
 
-        <!-- Модальное окно для увеличенного изображения -->
-        <div id="imageModal" class="modal">
-            <span class="close">&times;</span>
-            <div class="modal-content">
-                <img id="modalImg" src="" alt="Enlarged Image">
-            </div>
+    <!-- Модальное окно для увеличенного изображения -->
+    <div id="myModal" class="modal">
+        <span class="close">&times;</span>
+        <div class="modal-content">
+            <img id="modalImg" src="" alt="Enlarged Image">
         </div>
-        
-        <!-- Модальное окно для внешней ссылки -->
-        <div id="linkModal" class="modal">
-            <span class="close">&times;</span>
-            <div class="modal-content">
-                <iframe id="linkIframe" src="" frameborder="0" style="width: 100%; height: 80vh;"></iframe>
-            </div>
-        </div>
-
+    </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const items = document.querySelectorAll('.carousel-item');
-    const totalItems = items.length;
-    let currentIndex = parseInt("{{ request.POST.current_index|default:0 }}", 10) || 0;
+    document.addEventListener('DOMContentLoaded', function() {
+        const items = document.querySelectorAll('.carousel-item');
+        const totalItems = items.length;
+        const modal = document.getElementById("myModal");
+        const modalImg = document.getElementById("modalImg");
+        const closeModal = document.getElementsByClassName("close")[0];
 
-    const imageModal = document.getElementById("imageModal");
-    const modalImg = document.getElementById("modalImg");
-    const linkModal = document.getElementById("linkModal");
-    const linkIframe = document.getElementById("linkIframe");
-    const closeButtons = document.querySelectorAll(".modal .close");
+        // Установка модального окна как скрытого по умолчанию
+        modal.style.display = "none"; // Добавьте эту строку
 
-    // Инициализация текущего слайда
-    items.forEach((item, index) => {
-        item.classList.toggle('active', index === currentIndex);
-    });
-
-    document.getElementById('nextBtn').addEventListener('click', function() {
-        items[currentIndex].classList.remove('active');
-        currentIndex = (currentIndex + 1) % totalItems;
-        items[currentIndex].classList.add('active');
-    });
-
-    document.getElementById('prevBtn').addEventListener('click', function() {
-        items[currentIndex].classList.remove('active');
-        currentIndex = (currentIndex - 1 + totalItems) % totalItems;
-        items[currentIndex].classList.add('active');
-    });
-
-    // Открытие изображения в модальном окне
-    const images = document.querySelectorAll('.question-img, .success-img');
-    images.forEach(img => {
-        img.addEventListener('click', function() {
-            imageModal.style.display = "flex";
-            modalImg.src = this.src;
-        });
-    });
-
-    // Открытие внешней ссылки в модальном окне
-    const openLinkButtons = document.querySelectorAll('.open-link-btn');
-    openLinkButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const link = this.getAttribute('data-link');
-            linkIframe.src = link;
-            linkModal.style.display = "flex";
-        });
-    });
-
-    // Закрытие модальных окон
-    closeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            this.closest('.modal').style.display = "none";
-            if (this.closest('#linkModal')) {
-                linkIframe.src = "";  // Очистка источника iframe при закрытии
+        // Инициализация текущего слайда
+        let currentIndex = parseInt("{{ request.POST.current_index|default:0 }}", 10) || 0;
+        items.forEach((item, index) => {
+            if (index === currentIndex) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
             }
         });
-    });
 
-    // Закрытие модальных окон при клике вне их содержимого
-    [imageModal, linkModal].forEach(modal => {
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            items[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex + 1) % totalItems;
+            items[currentIndex].classList.add('active');
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', function() {
+            items[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex - 1 + totalItems) % totalItems;
+            items[currentIndex].classList.add('active');
+        });
+
+        // Открытие изображения в модальном окне
+        const images = document.querySelectorAll('.carousel-item img');
+        images.forEach(img => {
+            img.addEventListener('click', function() {
+                modal.style.display = "flex"; // Изменено с "block" на "flex" для соответствия вашему коду
+                modalImg.src = this.src;
+            });
+        });
+
+        // Закрытие модального окна
+        closeModal.addEventListener('click', function() {
+            modal.style.display = "none";
+        });
+
+        // Закрытие модального окна при клике вне изображения
         modal.addEventListener('click', function(event) {
-            if (event.target === modal) {
+            if (event.target == modal) {
                 modal.style.display = "none";
-                if (modal === linkModal) {
-                    linkIframe.src = "";  // Очистка источника iframe при закрытии
-                }
             }
         });
     });
-});
-
 </script>
 
 </body>
-
 </html>
 
 
