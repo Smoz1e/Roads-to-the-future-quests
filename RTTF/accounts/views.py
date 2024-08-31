@@ -101,13 +101,11 @@ def logout_view(request):
     return redirect('login')
 
 
-import re
+import string
 import nltk
-nltk.download('punkt')
-from nltk.corpus import stopwords
+nltk.download('wordnet')
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-import string
 
 def normalize_answer(answer):
     # Приведение к нижнему регистру
@@ -117,20 +115,27 @@ def normalize_answer(answer):
     answer = answer.translate(str.maketrans('', '', string.punctuation))
 
     # Удаление лишних пробелов
-    words = answer.split()  # Простая разбивка по пробелам
-    return " ".join(words).lower()
+    words = answer.split()
 
     # Лемматизация
     lemmatizer = WordNetLemmatizer()
-    words = word_tokenize(answer)
     normalized_words = [lemmatizer.lemmatize(word) for word in words]
 
-    # Сортировка слов для игнорирования порядка - не работает !!!
-    words = word_tokenize(answer.lower())  # Приводим ответ к нижнему регистру и разбиваем на слова
-    words.sort()  # Сортируем слова
-    return " ".join(words)
+    # Сортировка слов для игнорирования порядка
+    normalized_words.sort()
 
-    return ' '.join(normalized_words)
+    # Объединение слов в строку
+    return " ".join(normalized_words)
+
+# Пример использования:
+user_answer = "The cat is on the mat."
+correct_answer = "Mat the on cat is."
+
+normalized_user_answer = normalize_answer(user_answer)
+normalized_correct_answer = normalize_answer(correct_answer)
+
+print(normalized_user_answer == normalized_correct_answer)  # Должно вывести True
+
 
 
 # Детали квеста
