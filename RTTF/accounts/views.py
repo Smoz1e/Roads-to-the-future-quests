@@ -100,44 +100,6 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
-
-import string
-import nltk
-nltk.download('wordnet')
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-
-def normalize_answer(answer):
-    # Приведение к нижнему регистру
-    answer = answer.lower()
-
-    # Удаление пунктуации
-    answer = answer.translate(str.maketrans('', '', string.punctuation))
-
-    # Удаление лишних пробелов
-    words = answer.split()
-
-    # Лемматизация
-    lemmatizer = WordNetLemmatizer()
-    normalized_words = [lemmatizer.lemmatize(word) for word in words]
-
-    # Сортировка слов для игнорирования порядка
-    normalized_words.sort()
-
-    # Объединение слов в строку
-    return " ".join(normalized_words)
-
-# Пример использования:
-user_answer = "The cat is on the mat."
-correct_answer = "Mat the on cat is."
-
-normalized_user_answer = normalize_answer(user_answer)
-normalized_correct_answer = normalize_answer(correct_answer)
-
-print(normalized_user_answer == normalized_correct_answer)  # Должно вывести True
-
-
-
 # Детали квеста
 # views.py
 import logging
@@ -182,8 +144,8 @@ def quest_detail(request, quest_id):
         form = QuestAnswerForm(request.POST, question=question)
 
         if form.is_valid():
-            user_answer = normalize_answer(form.cleaned_data['answer'])
-            correct_answer = normalize_answer(question.correct_answer)
+            user_answer = form.cleaned_data['answer'].strip().lower()
+            correct_answer = question.correct_answer.strip().lower()
 
             if user_answer == correct_answer:
                 form.set_is_correct(True)
@@ -193,9 +155,9 @@ def quest_detail(request, quest_id):
                 form.set_is_correct(False)
                 form.set_response_text('Неверно, попробуйте еще раз.')
 
-            # Сохранение результата в сессию
+            # Сохраняем результат в сессию
             saved_answers[str(question.id)] = {
-                'answer': form.cleaned_data['answer'],  # Оригинальный ответ пользователя
+                'answer': user_answer,
                 'is_correct': form.is_correct,
                 'response_text': form.response_text,
             }
