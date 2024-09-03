@@ -18,7 +18,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from accounts.views import *  # Импортируй функцию представления для главной страницы
-from puzzel.views import  *
 from django.conf import settings
 from django.conf.urls.static import static
 
