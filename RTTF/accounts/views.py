@@ -30,7 +30,9 @@ def profile(request):
                 status = "Пройдено"
                 duration = quest_progress.get_duration()
                 if duration:
-                    status += f" (Время прохождения: {duration})"
+                    # Форматируем время, чтобы отображать его только до секунд
+                    duration_formatted = str(duration).split('.')[0]
+                    status += f" (Ваш результат: {duration_formatted})"
             else:
                 status = "Не пройдено"
         else:
@@ -41,6 +43,7 @@ def profile(request):
         'user': user,
         'quest_status': quest_status,
     })
+
 
 
 @login_required
